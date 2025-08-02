@@ -1,0 +1,6 @@
+@NotifierAnalyticsService_HostAddress = http://localhost:5228
+
+GET {{NotifierAnalyticsService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
