@@ -1,17 +1,20 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using StackExchange.Redis;
 
 namespace NotifierAnalyticsService.Controllers
 {
-    [Route("api/analytics/v1")]
+    [Route("api/v1/analytics")]
     [ApiController]
     public class AnalyticsController : ControllerBase
     {
         private readonly ILogger<AnalyticsController> logger;
+        private readonly IDatabase redis;
 
-        public AnalyticsController(ILogger<AnalyticsController> logger)
+        public AnalyticsController(ILogger<AnalyticsController> logger, IDatabase cache)
         {
             this.logger = logger;
+            this.redis = cache;
         }
 
         [HttpGet]
@@ -19,9 +22,9 @@ namespace NotifierAnalyticsService.Controllers
         {
             try
             {
-                throw new NotImplementedException();
+                var result = await redis.StreamRangeAsync("analytics", "-", "+", 1000, Order.Descending);
 
-                return Ok();
+                return Ok(result);
             }
             catch (Exception ex)
             {
