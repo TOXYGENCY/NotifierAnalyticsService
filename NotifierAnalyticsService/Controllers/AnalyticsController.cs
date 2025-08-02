@@ -22,9 +22,14 @@ namespace NotifierAnalyticsService.Controllers
         {
             try
             {
-                var result = await redis.StreamRangeAsync("analytics", "-", "+", 1000, Order.Descending);
+                var raw = await redis.StreamRangeAsync("analytics", "-", "+", 1000, Order.Descending);
 
-                return Ok(result);
+                return Ok(raw.Select(e => new
+                {
+                    id = e.Id.ToString(),
+                    notificationId = e["notificationId"].ToString(),
+                    status = e["status"].ToString()
+                }));
             }
             catch (Exception ex)
             {
