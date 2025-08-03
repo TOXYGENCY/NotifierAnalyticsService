@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+using NotifierAnalyticsService.Models;
 using StackExchange.Redis;
+using System.Linq;
 
 namespace NotifierAnalyticsService.Controllers
 {
@@ -23,13 +24,10 @@ namespace NotifierAnalyticsService.Controllers
             try
             {
                 var raw = await redis.StreamRangeAsync("analytics", "-", "+", 1000, Order.Descending);
+                var entries = raw.Select(e =>
+                    new NotificationStatusEntry(e.Id, e["notificationId"].ToString(), e["statusId"].ToString()));
 
-                return Ok(raw.Select(e => new
-                {
-                    id = e.Id.ToString(),
-                    notificationId = e["notificationId"].ToString(),
-                    status = e["status"].ToString()
-                }));
+                return Ok(entries);
             }
             catch (Exception ex)
             {
