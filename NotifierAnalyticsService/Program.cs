@@ -1,3 +1,5 @@
+using NotifierAnalyticsService.Interfaces;
+using NotifierAnalyticsService.Services;
 using StackExchange.Redis;
 
 namespace NotifierAnalyticsService
@@ -14,6 +16,7 @@ namespace NotifierAnalyticsService
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddScoped<INotificationStatusesCache, NotificationStatusesCache>();
             builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
                 ConnectionMultiplexer.Connect(builder.Configuration["Redis:ConnectionString"]));
             builder.Services.AddScoped(provider =>

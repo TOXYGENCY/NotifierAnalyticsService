@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using NotifierAnalyticsService.Models;
-using StackExchange.Redis;
-using System.Linq;
+using NotifierAnalyticsService.Interfaces;
 
 namespace NotifierAnalyticsService.Controllers
 {
@@ -10,24 +8,20 @@ namespace NotifierAnalyticsService.Controllers
     public class AnalyticsController : ControllerBase
     {
         private readonly ILogger<AnalyticsController> logger;
-        private readonly IDatabase redis;
+        private readonly INotificationStatusesCache cache;
 
-        public AnalyticsController(ILogger<AnalyticsController> logger, IDatabase cache)
+        public AnalyticsController(ILogger<AnalyticsController> logger, INotificationStatusesCache cache)
         {
             this.logger = logger;
-            this.redis = cache;
+            this.cache = cache;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetNotificationStatusesStats()
+        public async Task<IActionResult> GetLatestStatuses(uint entriesAmount)
         {
             try
             {
-                var raw = await redis.StreamRangeAsync("analytics", "-", "+", 1000, Order.Descending);
-                var entries = raw.Select(e =>
-                    new NotificationStatusEntry(e.Id, e["notificationId"].ToString(), e["statusId"].ToString()));
-
-                return Ok(entries);
+                return Ok(await cache.GetLatestStatusesAsync(entriesAmount));
             }
             catch (Exception ex)
             {
